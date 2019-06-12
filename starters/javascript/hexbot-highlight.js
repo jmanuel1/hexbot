@@ -35,27 +35,33 @@ hljs.initHighlightingOnLoad();
 function start_app() {
   // https://davidwalsh.name/add-rules-stylesheets
 
-  // Create the <style> tag
-	var style = document.createElement("style");
-
-	// Add a media (and/or media query) here if you'd like!
-	// style.setAttribute("media", "screen")
-	// style.setAttribute("media", "only screen and (max-width : 1024px)")
-
-	// WebKit hack :(
-	style.appendChild(document.createTextNode(""));
-
-	// Add the <style> element to the page
-	document.head.appendChild(style);
-
-  styleSheet = style.sheet;
-  styleElement = style;
+  createStyleSheet();
 
   // use hexbot to generate a theme
   generateTheme();
 
   // listen for changes in text
   updateOnChanges();
+  // listen for randomize button press
+  randomizeOnClick();
+}
+
+function createStyleSheet() {
+  // Create the <style> tag
+  var style = document.createElement("style");
+
+  // Add a media (and/or media query) here if you'd like!
+  // style.setAttribute("media", "screen")
+  // style.setAttribute("media", "only screen and (max-width : 1024px)")
+
+  // WebKit hack :(
+  style.appendChild(document.createTextNode(""));
+
+  // Add the <style> element to the page
+  document.head.appendChild(style);
+
+  styleSheet = style.sheet;
+  styleElement = style;
 }
 
 function generateTheme() {
@@ -84,6 +90,19 @@ function updateOnChanges() {
     hljs.highlightBlock(code);
     restoreCaret();
   });
+}
+
+function randomizeOnClick() {
+  const button = document.querySelector('button[name="randomize"]');
+  button.addEventListener('click', () => {
+    clearStyleSheet();
+    generateTheme();
+  })
+}
+
+function clearStyleSheet() {
+  document.head.removeChild(styleElement);
+  createStyleSheet();
 }
 
 // https://stackoverflow.com/a/38479462/3455228
