@@ -10,7 +10,22 @@ let offsetX;
 let offsetY;
 
 let styleSheet, styleElement;
-const classes = new Set(['keyword', 'built_in', 'type', 'literal', 'number']);
+// highlight.js general-purpose classes
+const classes = new Set([
+  'keyword',
+  'built_in',
+  'type',
+  'literal',
+  'number',
+  'regexp',
+  'string',
+  'subst',
+  'symbol',
+  'class',
+  'function',
+  'title',
+  'params'
+]);
 
 // init highlight.js
 hljs.initHighlightingOnLoad();
