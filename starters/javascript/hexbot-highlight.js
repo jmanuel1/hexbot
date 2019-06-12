@@ -33,8 +33,6 @@ hljs.initHighlightingOnLoad();
 // called by NOOPBOT on window.onload
 
 function start_app() {
-  // https://davidwalsh.name/add-rules-stylesheets
-
   createStyleSheet();
 
   // use hexbot to generate a theme
@@ -47,6 +45,8 @@ function start_app() {
 }
 
 function createStyleSheet() {
+  // https://davidwalsh.name/add-rules-stylesheets
+
   // Create the <style> tag
   var style = document.createElement("style");
 
@@ -65,8 +65,6 @@ function createStyleSheet() {
 }
 
 function generateTheme() {
-
-
   //get the data!
   NOOPBOT_FETCH({
     API: 'hexbot',
@@ -75,20 +73,31 @@ function generateTheme() {
 }
 
 function createTheme(responseJson) {
-  let { colors } = responseJson;
+  let {
+    colors
+  } = responseJson;
   let classList = [...classes];
   colors.forEach(function(color, index) {
-    styleSheet.insertRule(`.hljs-${classList[index]} { color: ${color.value} }`);
+    styleSheet.insertRule(
+      `
+      .hljs-${classList[index]} {
+        color: ${color.value}
+      }`
+    );
   });
   console.debug(styleElement);
 }
 
 function updateOnChanges() {
   const code = document.querySelector("#editor");
-  code.addEventListener('input', () => {
+  code.addEventListener('keyup', (event) => {
     restoreCaret = saveCaretPosition(code);
-    hljs.highlightBlock(code);
-    restoreCaret();
+    // use innerText to prevent current highlighting from interfering
+    const text = code.innerText;
+    const highlightedText = hljs.highlight('js', text, true).value;
+    // really shouldn't do this, I think
+    code.innerHTML = highlightedText;
+    restoreCaret(event.code === 'Enter');
   });
 }
 
@@ -106,40 +115,40 @@ function clearStyleSheet() {
 }
 
 // https://stackoverflow.com/a/38479462/3455228
-function saveCaretPosition(context){
-    var selection = window.getSelection();
-    var range = selection.getRangeAt(0);
-    range.setStart(  context, 0 );
-    var len = range.toString().length;
+function saveCaretPosition(context) {
+  var selection = window.getSelection();
+  var range = selection.getRangeAt(0);
+  range.setStart(context, 0);
+  var len = range.toString().length;
 
-    return function restore(){
-        var pos = getTextNodeAtPosition(context, len);
-        selection.removeAllRanges();
-        var range = new Range();
-        range.setStart(pos.node ,pos.position);
-        selection.addRange(range);
-
-    }
+  return function restore(shouldMoveToNextLine) {
+    var pos = getTextNodeAtPosition(context, len);
+    selection.removeAllRanges();
+    var range = new Range();
+    const position = pos.position + (shouldMoveToNextLine ? 1 : 0);
+    range.setStart(pos.node, position);
+    selection.addRange(range);
+  }
 }
 
 // https://stackoverflow.com/a/38479462/3455228
-function getTextNodeAtPosition(root, index){
-    var lastNode = null;
+function getTextNodeAtPosition(root, index) {
+  var lastNode = null;
 
-    var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT,
-      function next(elem) {
-        if(index >= elem.textContent.length){
-            index -= elem.textContent.length;
-            lastNode = elem;
-            return NodeFilter.FILTER_REJECT
-        }
-        return NodeFilter.FILTER_ACCEPT;
+  var treeWalker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT,
+    function next(elem) {
+      if (index >= elem.textContent.length) {
+        index -= elem.textContent.length;
+        lastNode = elem;
+        return NodeFilter.FILTER_REJECT
+      }
+      return NodeFilter.FILTER_ACCEPT;
     });
-    var c = treeWalker.nextNode();
-    return {
-        node: c? c: root,
-        position: c? index:  0
-    };
+  var c = treeWalker.nextNode();
+  return {
+    node: c ? c : root,
+    position: c ? index : 0
+  };
 }
 
 // // listen if browser changes size.
